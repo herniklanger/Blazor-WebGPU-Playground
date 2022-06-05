@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject IJSRuntime JS
 
 <PageTitle>Index</PageTitle>
 
@@ -7,3 +8,17 @@
 Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?"/>
+<canvas id="@canvaseId" width="600" height="600"/>
+@code {
+    Guid canvaseId = Guid.NewGuid();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            await JS.InvokeVoidAsync("InitGPU", canvaseId);
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}
