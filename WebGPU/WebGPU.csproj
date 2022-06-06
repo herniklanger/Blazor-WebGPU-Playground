@@ -24,8 +24,4 @@
       <Content Include="wwwroot\TS\GpuAcess.ts" />
     </ItemGroup>
 
-    <ItemGroup>
-      <TypeScriptCompile Include="wwwroot\TS\types\sharder.d.ts" />
-    </ItemGroup>
-
 </Project>
