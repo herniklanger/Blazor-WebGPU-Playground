@@ -1,4 +1,4 @@
-﻿// import sharder from "./Shaders/triangle.vert.wgsl";
+﻿// import {sharder} from "../Shaders/shaders.wgsl";
 const sharder = 
 `struct Fragment {
 @builtin(position) Position : vec4<f32>,
@@ -56,15 +56,17 @@ async function InitGPU(canvasId: string)
         canvasRef.clientWidth * devicePixelRatio,
         canvasRef.clientHeight * devicePixelRatio,
     ];
-    const presentationFormat = context.getPreferredFormat(adapter);
+    const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
 
     context.configure({
         device: device,
         format: presentationFormat,
-        size: presentationSize,
+        alphaMode: "opaque"
+        // size: {width: presentationSize[0], height: presentationSize[1]}
     });
 
     const pipeline = device.createRenderPipeline({
+        layout: device.createPipelineLayout({ bindGroupLayouts: [] }),
         vertex : {
             module : device.createShaderModule({
                 code : sharder
@@ -92,12 +94,13 @@ async function InitGPU(canvasId: string)
     const renderPass : GPURenderPassEncoder = commandEncoder.beginRenderPass({
         colorAttachments: [{    
             view: textureView,
-            clearValue: {r:0.5, g:0.0, b:0.25, a:1.0},
+            clearValue: {r:0.5, g:0.5, b:0.8, a:1.0},
             loadOp: "clear",
             storeOp: "store"
         }]
     });
     renderPass.setPipeline(pipeline);
+    // renderPass.setBindGroup(0, bind)
     renderPass.draw(3,1,0,0);
     renderPass.end();
     
