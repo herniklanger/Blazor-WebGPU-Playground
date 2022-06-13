@@ -28,7 +28,7 @@ fn vs_main(@location(0) position : vec2<f32>, @builtin(vertex_index) v_id: u32) 
     return Output;
 }
 
-@stage(fragment)
+@fragment
 fn fs_main(@location(0) Color: vec4<f32>) -> @location(0) vec4<f32> {
     return Color;
 }`;
