@@ -12,11 +12,18 @@ Welcome to your new app.
 @code {
     Guid canvaseId = Guid.NewGuid();
 
+    float[] vertex = new float[]
+    {
+        0.0f, 0.5f,
+        -0.5f, -0.5f,
+        0.25f, -0.5f
+    };
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if(firstRender)
         {
-            await JS.InvokeVoidAsync("InitGPU", canvaseId);
+            int test = 65;
+            await JS.InvokeVoidAsync("InitGPU", canvaseId, test); 
         }
         await base.OnAfterRenderAsync(firstRender);
     }

@@ -14,15 +14,15 @@ const sharder = `struct Fragment {
 @location(0) Color : vec4<f32>
 };
 
-@stage(vertex)
-fn vs_main(@builtin(vertex_index) v_id: u32) -> Fragment {
+@vertex
+fn vs_main(@location(0) position : vec2<f32>, @builtin(vertex_index) v_id: u32) -> Fragment {
 
     //pre-bake positions and colors, for now.
-    var positions = array<vec2<f32>, 3> (
-        vec2<f32>( 0.0,  0.5),
-        vec2<f32>(-0.5, -0.5),
-        vec2<f32>( 0.5, -0.5)
-    );
+    // var positions = array<vec2<f32>, 3> (
+    //     vec2<f32>( 0.0,  0.5),
+    //     vec2<f32>(-0.5, -0.5),
+    //     vec2<f32>( 0.5, -0.5)
+    // );
 
     var colors = array<vec3<f32>, 3> (
         vec3<f32>(1.0, 0.0, 0.0),
@@ -31,7 +31,7 @@ fn vs_main(@builtin(vertex_index) v_id: u32) -> Fragment {
     );
 
     var Output : Fragment;
-    Output.Position = vec4<f32>(positions[v_id], 0.0, 1.0);
+    Output.Position = vec4<f32>(position, 0.0, 1.0);
     Output.Color = vec4<f32>(colors[v_id], 1.0);
 
     return Output;
@@ -47,8 +47,15 @@ function GetDevice() {
         return yield (adapter === null || adapter === void 0 ? void 0 : adapter.requestDevice());
     });
 }
-function InitGPU(canvasId) {
+const cubeVertexArray = new Float32Array([
+    0.0, 0.5,
+    -0.5, -0.5,
+    0.5, -0.25
+]);
+function InitGPU(canvasId, test) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(test);
+        const vertexArray = cubeVertexArray;
         const adapter = yield navigator.gpu.requestAdapter();
         if (!adapter)
             return;
@@ -65,16 +72,36 @@ function InitGPU(canvasId) {
         context.configure({
             device: device,
             format: presentationFormat,
-            alphaMode: "premultiplied"
+            alphaMode: "opaque"
             // size: {width: presentationSize[0], height: presentationSize[1]}
         });
+        const verticesBuffer = device.createBuffer({
+            size: vertexArray.byteLength,
+            usage: GPUBufferUsage.VERTEX,
+            mappedAtCreation: true,
+        });
+        new Float32Array(verticesBuffer.getMappedRange()).set(vertexArray);
+        verticesBuffer.unmap();
         const pipeline = device.createRenderPipeline({
             layout: device.createPipelineLayout({ bindGroupLayouts: [] }),
             vertex: {
                 module: device.createShaderModule({
                     code: sharder
                 }),
-                entryPoint: "vs_main"
+                entryPoint: "vs_main",
+                buffers: [
+                    {
+                        arrayStride: 4 * 2,
+                        attributes: [
+                            {
+                                // position
+                                shaderLocation: 0,
+                                offset: 0,
+                                format: 'float32x2'
+                            }
+                        ]
+                    }
+                ]
             },
             fragment: {
                 module: device.createShaderModule({
@@ -101,6 +128,7 @@ function InitGPU(canvasId) {
         });
         renderPass.setPipeline(pipeline);
         // renderPass.setBindGroup(0, bind)
+        renderPass.setVertexBuffer(0, verticesBuffer);
         renderPass.draw(3, 1, 0, 0);
         renderPass.end();
         device.queue.submit([commandEncoder.finish()]);
