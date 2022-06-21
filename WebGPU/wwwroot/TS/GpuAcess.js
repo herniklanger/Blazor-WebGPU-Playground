@@ -37,7 +37,7 @@ fn vs_main(@location(0) position : vec2<f32>, @builtin(vertex_index) v_id: u32) 
     return Output;
 }
 
-@stage(fragment)
+@fragment
 fn fs_main(@location(0) Color: vec4<f32>) -> @location(0) vec4<f32> {
     return Color;
 }`;
@@ -47,15 +47,16 @@ function GetDevice() {
         return yield (adapter === null || adapter === void 0 ? void 0 : adapter.requestDevice());
     });
 }
-const cubeVertexArray = new Float32Array([
+var cubeVertexArray = new Float32Array([
     0.0, 0.5,
     -0.5, -0.5,
     0.5, -0.25
 ]);
-function InitGPU(canvasId, test) {
+function InitGPU(canvasId, vertexArray) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(test);
-        const vertexArray = cubeVertexArray;
+        if (vertexArray != null) {
+            cubeVertexArray = new Float32Array(vertexArray);
+        }
         const adapter = yield navigator.gpu.requestAdapter();
         if (!adapter)
             return;
@@ -76,7 +77,7 @@ function InitGPU(canvasId, test) {
             // size: {width: presentationSize[0], height: presentationSize[1]}
         });
         const verticesBuffer = device.createBuffer({
-            size: vertexArray.byteLength,
+            size: 32,
             usage: GPUBufferUsage.VERTEX,
             mappedAtCreation: true,
         });

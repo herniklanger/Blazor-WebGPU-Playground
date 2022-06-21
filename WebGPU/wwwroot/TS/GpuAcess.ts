@@ -39,15 +39,18 @@ async function GetDevice()
     return await adapter?.requestDevice();
 }
 
-const cubeVertexArray = new Float32Array([
+var cubeVertexArray = new Float32Array([
     0.0,  0.5,
     -0.5, -0.5,
     0.5, -0.25
 ]);
 
-async function InitGPU(canvasId: string)
+async function InitGPU(canvasId: string, vertexArray :Float32Array)
 {
-    const vertexArray = cubeVertexArray;
+    const vertxtSize = 32;
+    if(vertexArray != null){
+        cubeVertexArray = new Float32Array(vertexArray) ;
+    }
     const adapter = await navigator.gpu.requestAdapter();
     if(!adapter) return;
     const device = await adapter.requestDevice();
@@ -72,7 +75,7 @@ async function InitGPU(canvasId: string)
         // size: {width: presentationSize[0], height: presentationSize[1]}
     });
     const verticesBuffer = device.createBuffer({
-        size: vertexArray.byteLength,
+        size: vertxtSize,
         usage: GPUBufferUsage.VERTEX,
         mappedAtCreation: true,
     });

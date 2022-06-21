@@ -22,8 +22,7 @@ Welcome to your new app.
     {
         if(firstRender)
         {
-            int test = 65;
-            await JS.InvokeVoidAsync("InitGPU", canvaseId, test); 
+            await JS.InvokeVoidAsync("InitGPU", canvaseId, vertex);
         }
         await base.OnAfterRenderAsync(firstRender);
     }
